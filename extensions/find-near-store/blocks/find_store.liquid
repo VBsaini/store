@@ -1,0 +1,361 @@
+{% comment %} <div id="find-store-page">
+  <h1>Find Nearest Store</h1>
+
+  <!-- Country Dropdown -->
+  <label for="country">Country:</label>
+  <select id="country" name="country">
+    <option value="">Select Country</option>
+  </select>
+
+  <!-- State Dropdown -->
+  <label for="state">State:</label>
+  <select id="state" name="state" disabled>
+    <option value="">Select State</option>
+  </select>
+  
+
+  <!-- Find Store Button -->
+  <button id="find-store-btn" disabled>Find Nearest Store</button>
+
+  <!-- Store Results -->
+  <div id="store-results" style="margin-top: 20px;">
+    <h2>Nearest Store:</h2>
+    <p id="store-info">Please select your location to find the nearest store.</p>
+  </div>
+</div> {% endcomment %}
+
+
+{% comment %} <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const countryDropdown = document.getElementById("country");
+    const stateDropdown = document.getElementById("state");
+    const findStoreBtn = document.getElementById("find-store-btn");
+    const storeInfo = document.getElementById("store-info");
+
+    // Fetch data from the app.proxy endpoint
+    fetch("https://test-locator.myshopify.com/apps/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        console.log("Response received from API:", response);
+        return response.json(); // Parse the JSON response
+      })
+      .then((data) => {
+        // Extract shop data from the response
+        const shopData = data || [];
+        if (shopData.length === 0) {
+          storeInfo.textContent = "No store locations found.";
+          return;
+        }
+
+        // Populate the country dropdown
+        const countries = [...new Set(shopData.map((loc) => loc.country))];
+        countries.forEach((country) => {
+          const option = document.createElement("option");
+          option.value = country;
+          option.textContent = country;
+          countryDropdown.appendChild(option);
+        });
+
+        // Handle Country Selection
+        countryDropdown.addEventListener("change", () => {
+          const selectedCountry = countryDropdown.value;
+          stateDropdown.innerHTML = '<option value="">Select State</option>';
+          findStoreBtn.disabled = true;
+
+          if (selectedCountry) {
+            const states = [
+              ...new Set(
+                shopData
+                  .filter((loc) => loc.country === selectedCountry)
+                  .map((loc) => loc.state)
+              ),
+            ];
+            stateDropdown.disabled = false;
+            states.forEach((state) => {
+              const option = document.createElement("option");
+              option.value = state;
+              option.textContent = state;
+              stateDropdown.appendChild(option);
+            });
+          } else {
+            stateDropdown.disabled = true;
+          }
+        });
+
+        // Handle State Selection
+        stateDropdown.addEventListener("change", () => {
+          if (stateDropdown.value) {
+            findStoreBtn.disabled = false;
+          } else {
+            findStoreBtn.disabled = true;
+          }
+        });
+
+        // Handle Find Store Button Click
+        findStoreBtn.addEventListener("click", () => {
+          const selectedCountry = countryDropdown.value;
+          const selectedState = stateDropdown.value;
+          const store = shopData.find(
+            (loc) =>
+              loc.country === selectedCountry && loc.state === selectedState
+          );
+          if (store) {
+            storeInfo.textContent = `Nearest store is located at ${store.address}, ${store.state}, ${store.country}.`;
+          } else {
+            storeInfo.textContent = "Store not found.";
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching store data:", error);
+        storeInfo.textContent = "Failed to fetch store locations.";
+      });
+  });
+</script> {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof L === "undefined") {
+    console.error("Leaflet.js is not loaded. Please check the script tag.");
+    return;
+  }
+  const countryDropdown = document.getElementById("country");
+  const stateDropdown = document.getElementById("state");
+  const findStoreBtn = document.getElementById("find-store-btn");
+  const storeInfo = document.getElementById("store-info");
+  const mapContainer = document.getElementById("map");
+
+  let map;
+  let marker;
+
+  // Fetch data from the app.proxy endpoint
+  fetch("https://test-locator.myshopify.com/apps/proxy", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const shopData = data || [];
+      if (shopData.length === 0) {
+        storeInfo.textContent = "No store locations found.";
+        return;
+      }
+
+      // Populate the country dropdown
+      const countries = [...new Set(shopData.map((loc) => loc.country))];
+      countries.forEach((country) => {
+        const option = document.createElement("option");
+        option.value = country;
+        option.textContent = country;
+        countryDropdown.appendChild(option);
+      });
+
+      // Handle Country Selection
+      countryDropdown.addEventListener("change", () => {
+        const selectedCountry = countryDropdown.value;
+        stateDropdown.innerHTML = '<option value="">Select State</option>';
+        findStoreBtn.disabled = true;
+
+        if (selectedCountry) {
+          const states = [
+            ...new Set(
+              shopData
+                .filter((loc) => loc.country === selectedCountry)
+                .map((loc) => loc.state),
+            ),
+          ];
+          stateDropdown.disabled = false;
+          states.forEach((state) => {
+            const option = document.createElement("option");
+            option.value = state;
+            option.textContent = state;
+            stateDropdown.appendChild(option);
+          });
+        } else {
+          stateDropdown.disabled = true;
+        }
+      });
+
+      // Handle State Selection
+      stateDropdown.addEventListener("change", () => {
+        const selectedState = stateDropdown.value;
+        findStoreBtn.disabled = !selectedState;
+      });
+
+      // Handle Find Store Button Click
+      findStoreBtn.addEventListener("click", () => {
+        const selectedCountry = countryDropdown.value;
+        const selectedState = stateDropdown.value;
+        const store = shopData.find(
+          (loc) =>
+            loc.country === selectedCountry && loc.state === selectedState,
+        );
+
+        if (store) {
+          storeInfo.textContent = `Nearest store is located at ${store.address}, ${store.state}, ${store.country}.`;
+
+          // Initialize the map
+          if (!map) {
+            map = L.map("map").setView(
+              [
+                parseFloat(store.coordinates.lat),
+                parseFloat(store.coordinates.lng),
+              ],
+              12,
+            );
+
+            // Add OpenStreetMap tiles
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            }).addTo(map);
+          } else {
+            map.setView(
+              [
+                parseFloat(store.coordinates.lat),
+                parseFloat(store.coordinates.lng),
+              ],
+              12,
+            );
+          }
+
+          // Add a marker
+          if (marker) {
+            marker.remove(); // Remove the previous marker
+          }
+          marker = L.marker([
+            parseFloat(store.coordinates.lat),
+            parseFloat(store.coordinates.lng),
+          ])
+            .addTo(map)
+            .bindPopup(
+              `<strong>${store.storeName}</strong><br>${store.address}<br>${store.state}, ${store.country}`,
+            )
+            .openPopup();
+        } else {
+          storeInfo.textContent = "Store not found.";
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching store data:", error);
+      storeInfo.textContent = "Failed to fetch store locations.";
+    });
+});
+</script>
+</head>
+  <body>
+    <div id="find-store-page">
+    <h1>Find Nearest Store</h1>
+
+
+    <label for="country">Country:</label>
+    <select id="country" name="country">
+      <option value="">Select Country</option>
+    </select>
+
+
+    <label for="state">State:</label>
+    <select id="state" name="state" disabled>
+      <option value="">Select State</option>
+    </select>
+
+    <button id="find-store-btn" disabled>Find Nearest Store</button>
+    <div id="store-results" style="margin-top: 20px;">
+      <h2>Nearest Store:</h2>
+      <p id="store-info">Please select your location to find the nearest store.</p>
+    </div>
+
+    <div id="map" style="height: 400px; width: 100%; margin-top: 20px;"></div>
+  </div>
+
+</body>
+</html>
+
+
+
+
+<style>
+  #find-store-page {
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  #store-results {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+</style>
+
+
+
+
+{% schema %}
+  {
+    "name": "Find Store Block",
+    "target": "section",
+    "stylesheet": "app.css",
+    "javascript": "app.js",
+    "settings": [
+      {
+        "label": "Block Title",
+        "id": "block_title",
+        "type": "text",
+        "default": "Find Nearest Store"
+      },
+      {
+        "label": "Button Text",
+        "id": "button_text",
+        "type": "text",
+        "default": "Find Nearest Store"
+      }
+    ]
+  }
+{% endschema %}
