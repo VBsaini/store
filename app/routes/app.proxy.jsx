@@ -30,7 +30,7 @@ export const action = async ({ request }) => {
     }
 
     return new Response(JSON.stringify({ message: "Store not found" }), {
-      status: 404,
+      status: 200,
       headers: { "Content-Type": "application/json" },
     });
   }

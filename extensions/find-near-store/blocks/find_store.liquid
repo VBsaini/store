@@ -145,13 +145,16 @@ document.addEventListener("DOMContentLoaded", function () {
   let marker;
 
   // Fetch data from the app.proxy endpoint
-  fetch("https://test-locator.myshopify.com/apps/proxy", {
+  fetch("https://store-locater.myshopify.com/apps/proxytest", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+    redirect: "manual",
+    headers: { 
+      "Content-Type": "application/json", 
     },
   })
-    .then((response) => response.json())
+    .then((response) => 
+    response.json()    
+  )
     .then((data) => {
       const shopData = data || [];
       if (shopData.length === 0) {

@@ -18,7 +18,6 @@ export default function App() {
 
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
-      {/* ds.something   => /ds/something */}
       <Link
         to="/app/storeinfoform"
         className="Polaris-Button Polaris-Button--primary"
