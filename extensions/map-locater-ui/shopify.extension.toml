@@ -1,0 +1,8 @@
+name = "map-locater-ui"
+type = "theme"
+
+[extension_points.theme_extension]
+targets = [
+  { target = "section", type = "block" }
+]
+

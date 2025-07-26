@@ -24,9 +24,10 @@ export default function App() {
         </Link>
         <Link to="/app/storeinfoform">StoreInfoForm page</Link>
         <Link to="/app/billing">Billing page</Link>
+        <Link to="/app/test-metafields">Test Metafields</Link>
         <Link style={{ display: "none" }} to="/app/proxy">
-        Proxy
-      </Link>
+          Proxy
+        </Link>
       </NavMenu>
       <Outlet />
     </AppProvider>

@@ -3,7 +3,7 @@
 client_id = "bcc6bbaa825163b16436bbc6f7696d6b"
 name = "StorePoint"
 handle = "storepoint"
-application_url = "https://statutes-apps-fan-committee.trycloudflare.com"
+application_url = "https://operators-mats-sticks-argument.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,11 @@ api_version = "2025-07"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://statutes-apps-fan-committee.trycloudflare.com/auth/callback", "https://statutes-apps-fan-committee.trycloudflare.com/auth/shopify/callback", "https://statutes-apps-fan-committee.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://operators-mats-sticks-argument.trycloudflare.com/auth/callback",
+  "https://operators-mats-sticks-argument.trycloudflare.com/auth/shopify/callback",
+  "https://operators-mats-sticks-argument.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false
