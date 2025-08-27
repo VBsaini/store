@@ -1,0 +1,32 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "2ae4b67a9fc3757a870a529f060fa7e8"
+name = "MyStore Locator App"
+handle = "mystore-locator-app"
+application_url = "https://track-miami-story-towers.trycloudflare.com"
+embedded = true
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://track-miami-story-towers.trycloudflare.com/auth/callback",
+  "https://track-miami-story-towers.trycloudflare.com/auth/shopify/callback",
+  "https://track-miami-story-towers.trycloudflare.com/api/auth/callback"
+]
+
+[app_proxy]
+url = "https://track-miami-story-towers.trycloudflare.com/storedata/storeinfo"
+subpath = "proxy"
+prefix = "apps"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true

@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "d125bd69d2b12bd08b7aa9aa94b8b5f9"
-name = "store"
-handle = "store-206"
-application_url = "https://alter-t-nigeria-hosting.trycloudflare.com"
+client_id = "bcc6bbaa825163b16436bbc6f7696d6b"
+name = "StorePoint"
+handle = "storepoint"
+application_url = "https://operators-mats-sticks-argument.trycloudflare.com"
 embedded = true
 
 [build]
@@ -11,7 +11,7 @@ include_config_on_deploy = true
 automatically_update_urls_on_dev = true
 
 [webhooks]
-api_version = "2025-04"
+api_version = "2025-07"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://alter-t-nigeria-hosting.trycloudflare.com/auth/callback",
-  "https://alter-t-nigeria-hosting.trycloudflare.com/auth/shopify/callback",
-  "https://alter-t-nigeria-hosting.trycloudflare.com/api/auth/callback"
+  "https://operators-mats-sticks-argument.trycloudflare.com/auth/callback",
+  "https://operators-mats-sticks-argument.trycloudflare.com/auth/shopify/callback",
+  "https://operators-mats-sticks-argument.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

@@ -1,0 +1,568 @@
+
+
+{% assign store_locations = shop.metafields.store_locator.locations.value %}
+{% assign total_stores = shop.metafields.store_locator.total_stores.value | default: 0 %}
+
+<div class="store-locator-block" style="padding: {{ block.settings.padding }}px; background-color: {{ block.settings.background_color }}; border-radius: {{ block.settings.border_radius }}px;">
+  
+  {% if store_locations and store_locations.size > 0 %}
+    
+    <!-- Always show the modern store finder interface -->
+    <!-- Modern Store Finder Section -->
+    <div class="location-form" style="display: block !important; visibility: visible !important; background-color: white; padding: 40px; margin: 20px 0; border: 2px solid #e53935;">
+      <h2 style="color: {{ block.settings.title_color }}; font-size: 2.5rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 1rem;">
+        {{ block.settings.finder_title | default: 'FIND A STORE NEAR YOU' }}
+      </h2>
+        
+        <!-- Show store count -->
+        {% if total_stores > 0 %}
+          <p class="store-count" style="color: {{ block.settings.text_color }}; font-size: 1.1rem; margin-bottom: 2rem; text-align: center;">
+            We have {{ total_stores }} {% if total_stores == 1 %}store{% else %}stores{% endif %} to serve you better.
+          </p>
+        {% endif %}
+        
+        <form id="locationForm-{{ block.id }}" style="text-align: center; display: block !important;">
+          <div style="margin-bottom: 20px;">
+            <select name="country" id="country-{{ block.id }}" required style="width: 250px; padding: 12px; margin: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: white;">
+              <option value="" disabled selected>Select Country</option>
+            </select>
+
+            <select name="state" id="state-{{ block.id }}" required disabled style="width: 250px; padding: 12px; margin: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa;">
+              <option value="" disabled selected>Select State</option>
+            </select>
+
+            <select name="city" id="city-{{ block.id }}" required disabled style="width: 250px; padding: 12px; margin: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa;">
+              <option value="" disabled selected>Select City</option>
+            </select>
+          </div>
+
+          <button type="submit" style="background-color: #e53935; color: white; padding: 12px 30px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase;">
+            {{ block.settings.button_text | default: 'FIND STORES' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Map Container -->
+      {% if block.settings.show_finder_map %}
+        <div id="map-{{ block.id }}" class="store-map"></div>
+        <div id="store-info-{{ block.id }}" class="store-info-box"></div>
+      {% endif %}
+
+    {% if block.settings.show_all_stores %}
+      <!-- All Stores List -->
+      <div class="stores-container" style="margin-top: 40px;">
+        <h3 style="color: {{ block.settings.title_color }}; margin-bottom: 20px; text-align: center;">{{ block.settings.all_stores_title | default: 'All Store Locations' }}</h3>
+        {% for store in store_locations %}
+          <div class="store-item" style="margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fafafa;">
+            
+            <h4 class="store-name" style="color: {{ block.settings.store_name_color }}; margin-bottom: 10px; font-size: 1.2em;">
+              {{ store.storeName }}
+            </h4>
+            
+            <div class="store-address" style="color: {{ block.settings.text_color }}; margin-bottom: 10px;">
+              <p>{{ store.address }}</p>
+              <p>{{ store.city }}, {{ store.state }}, {{ store.country }}</p>
+            </div>
+
+            {% if block.settings.show_coordinates and store.coordinates %}
+              <div class="store-coordinates" style="color: {{ block.settings.text_color }}; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>Coordinates:</strong> {{ store.coordinates.lat }}, {{ store.coordinates.lng }}
+              </div>
+            {% endif %}
+
+            {% if block.settings.show_map_link and store.coordinates %}
+              <a href="https://www.google.com/maps?q={{ store.coordinates.lat }},{{ store.coordinates.lng }}" 
+                 target="_blank" 
+                 class="map-link"
+                 style="display: inline-block; background-color: {{ block.settings.button_color }}; color: {{ block.settings.button_text_color }}; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">
+                📍 View on Map
+              </a>
+            {% endif %}
+
+            {% if block.settings.show_directions_link and store.coordinates %}
+              <a href="https://www.google.com/maps/dir/?api=1&destination={{ store.coordinates.lat }},{{ store.coordinates.lng }}" 
+                 target="_blank" 
+                 class="directions-link"
+                 style="display: inline-block; background-color: {{ block.settings.secondary_button_color }}; color: {{ block.settings.button_text_color }}; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 0.9em; margin-left: 10px;">
+                🧭 Get Directions
+              </a>
+            {% endif %}
+
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="no-stores-message" style="text-align: center; padding: 40px; color: {{ block.settings.text_color }};">
+      <p>{{ block.settings.no_stores_message | default: 'No store locations available at the moment.' }}</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Leaflet CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+  .store-locator-block {
+    font-family: Arial, sans-serif !important;
+    background: #f8f9fa !important;
+  }
+
+  .store-locator-block .location-form {
+    max-width: 1000px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    padding: 3rem 1rem !important;
+    background: transparent !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .store-locator-block .location-form h2 {
+    font-size: 2.5rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 1rem !important;
+    color: #222 !important;
+    font-family: 'Helvetica Neue', Arial, sans-serif !important;
+    letter-spacing: 2px !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .store-locator-block .store-count {
+    font-size: 1.1rem !important;
+    color: #666 !important;
+    margin-bottom: 2rem !important;
+    font-weight: 400 !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .store-locator-block .location-form select {
+    width: 30% !important;
+    padding: 0.8rem 1rem !important;
+    margin: 0.5rem !important;
+    font-size: 1rem !important;
+    border-radius: 6px !important;
+    border: 1px solid #ccc !important;
+    background-color: #fff !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    display: inline-block !important;
+    visibility: visible !important;
+  }
+
+  .store-locator-block .location-form button {
+    display: inline-block !important;
+    margin-top: 1.5rem !important;
+    padding: 0.9rem 2rem !important;
+    background-color: #e53935 !important;
+    color: #fff !important;
+    font-size: 1.1rem !important;
+    font-weight: bold !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    transition: 0.3s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    visibility: visible !important;
+  }
+
+  .location-form button:hover {
+    background-color: #c62828 !important;
+    transform: translateY(-2px);
+  }
+
+  .location-form select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3) !important;
+  }
+
+  .location-form select:disabled {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+  }
+
+  .store-map {
+    height: {{ block.settings.finder_map_height | default: 400 }}px;
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .store-info-box {
+    position: absolute;
+    top: 350px;
+    right: 20px;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    width: 300px;
+    display: none;
+    font-size: 14px;
+  }
+
+  .store-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .map-link:hover,
+  .directions-link:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    .store-locator-block {
+      padding: 15px !important;
+    }
+    
+    .location-form select {
+      width: 90%;
+      margin-bottom: 1rem;
+    }
+    
+    .store-item {
+      padding: 10px !important;
+    }
+    
+    .map-link,
+    .directions-link {
+      display: block !important;
+      margin: 5px 0 !important;
+      text-align: center;
+    }
+
+    .store-info-box {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: 100%;
+      margin-top: 20px;
+    }
+  }
+</style>
+
+<!-- Always load the store finder JavaScript -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const blockId = '{{ block.id }}';
+    const countrySelect = document.getElementById('country-' + blockId);
+    const stateSelect = document.getElementById('state-' + blockId);
+    const citySelect = document.getElementById('city-' + blockId);
+    const form = document.getElementById('locationForm-' + blockId);
+    const mapContainer = document.getElementById('map-' + blockId);
+    const storeInfoBox = document.getElementById('store-info-' + blockId);
+
+    let map;
+    let storeMarkers = [];
+
+    // Store data from metafields
+    const shopData = {{ store_locations | json }};
+    
+    console.log("Store Locator Debug - Block ID:", blockId);
+    console.log("Store Locator Debug - Shop Data:", shopData);
+    console.log("Store Locator Debug - Country Select:", countrySelect);
+
+    if (!Array.isArray(shopData) || shopData.length === 0) {
+      console.log("No store locations found.");
+      if (countrySelect) {
+        countrySelect.innerHTML = '<option value="" disabled selected>No stores available</option>';
+      }
+      return;
+    }
+
+    // Populate country dropdown
+    const countries = [...new Set(shopData.map(loc => loc.country))];
+    console.log("Store Locator Debug - Countries found:", countries);
+    
+    countries.forEach(country => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.textContent = country;
+      countrySelect.appendChild(option);
+    });
+    
+    console.log("Store Locator Debug - Country dropdown populated with", countries.length, "countries");
+
+    // Handle country selection
+    countrySelect.addEventListener("change", () => {
+      const selectedCountry = countrySelect.value;
+      const states = [...new Set(shopData.filter(loc => loc.country === selectedCountry).map(loc => loc.state))];
+      
+      stateSelect.innerHTML = '<option value="" disabled selected>State</option>';
+      citySelect.innerHTML = '<option value="" disabled selected>City</option>';
+      stateSelect.disabled = false;
+      citySelect.disabled = true;
+
+      states.forEach(state => {
+        const option = document.createElement("option");
+        option.value = state;
+        option.textContent = state;
+        stateSelect.appendChild(option);
+      });
+    });
+
+    // Handle state selection
+    stateSelect.addEventListener("change", () => {
+      const selectedCountry = countrySelect.value;
+      const selectedState = stateSelect.value;
+      const cities = [...new Set(shopData.filter(loc =>
+        loc.country === selectedCountry && loc.state === selectedState
+      ).map(loc => loc.city))];
+
+      citySelect.innerHTML = '<option value="" disabled selected>City</option>';
+      citySelect.disabled = false;
+
+      cities.forEach(city => {
+        const option = document.createElement("option");
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+      });
+    });
+
+    // Handle form submission
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const selectedCountry = countrySelect.value;
+      const selectedState = stateSelect.value;
+      const selectedCity = citySelect.value;
+
+      const matchedStores = shopData.filter(loc =>
+        loc.country === selectedCountry &&
+        loc.state === selectedState &&
+        loc.city === selectedCity &&
+        loc.coordinates?.lat &&
+        loc.coordinates?.lng
+      );
+
+      if (matchedStores.length === 0) {
+        alert("No stores found in the selected location.");
+        return;
+      }
+
+      {% if block.settings.show_finder_map %}
+      if (mapContainer) {
+        const firstStore = matchedStores[0];
+        const centerLat = parseFloat(firstStore.coordinates.lat);
+        const centerLng = parseFloat(firstStore.coordinates.lng);
+
+        // Initialize or reset map
+        if (!map) {
+          map = L.map('map-' + blockId).setView([centerLat, centerLng], 13);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap contributors",
+          }).addTo(map);
+        } else {
+          map.setView([centerLat, centerLng], 13);
+        }
+
+        // Clear previous markers
+        storeMarkers.forEach(m => map.removeLayer(m));
+        storeMarkers = [];
+
+        // Add all matched store markers
+        matchedStores.forEach(store => {
+          const lat = parseFloat(store.coordinates.lat);
+          const lng = parseFloat(store.coordinates.lng);
+          const name = store.storeName || "Store";
+          const address = store.address || "";
+
+          const newMarker = L.marker([lat, lng]).addTo(map);
+
+          // Add click event to show custom popup
+          newMarker.on("click", () => {
+            if (storeInfoBox) {
+              storeInfoBox.style.display = "block";
+              storeInfoBox.innerHTML = `
+                <strong>${name}</strong><br>
+                ${address}<br><br>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" 
+                   target="_blank" 
+                   style="color: {{ block.settings.button_color }}; font-weight: bold;">
+                   Get Directions
+                </a>
+              `;
+            }
+          });
+
+          storeMarkers.push(newMarker);
+        });
+
+        // Optionally open popup for first store
+        if (storeMarkers[0]) {
+          storeMarkers[0].fire("click");
+        }
+      }
+      {% endif %}
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Store Locator",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Title Settings"
+    },
+    {
+      "type": "text",
+      "id": "finder_title",
+      "label": "Main title",
+      "default": "FIND A STORE NEAR YOU"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#222222"
+    },
+    {
+      "type": "header",
+      "content": "Store Finder Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_store_finder",
+      "label": "Show interactive store finder",
+      "default": true,
+      "info": "Allows customers to search stores by country, state, and city"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Submit button text",
+      "default": "SUBMIT"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_finder_map",
+      "label": "Show map in finder results",
+      "default": true,
+      "info": "Uses Leaflet maps (free, no API key required)"
+    },
+    {
+      "type": "range",
+      "id": "finder_map_height",
+      "label": "Map height (px)",
+      "min": 300,
+      "max": 600,
+      "step": 50,
+      "default": 400
+    },
+    {
+      "type": "header",
+      "content": "All Stores List Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_all_stores",
+      "label": "Show all stores list",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "all_stores_title",
+      "label": "All stores section title",
+      "default": "All Store Locations"
+    },
+    {
+      "type": "color",
+      "id": "store_name_color",
+      "label": "Store name color",
+      "default": "#2c5aa0"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#666666"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_coordinates",
+      "label": "Show coordinates",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_map_link",
+      "label": "Show map link",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_directions_link",
+      "label": "Show directions link",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Primary button color",
+      "default": "#e53935"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_color",
+      "label": "Secondary button color",
+      "default": "#28a745"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Block padding (px)",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius (px)",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "text",
+      "id": "no_stores_message",
+      "label": "No stores message",
+      "default": "No store locations available at the moment."
+    }
+  ]
+}
+{% endschema %}

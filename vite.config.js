@@ -49,14 +49,6 @@ export default defineConfig({
       // See https://vitejs.dev/config/server-options.html#server-fs-allow for more information
       allow: ["app", "node_modules"],
     },
-    proxy: {
-      "/api": {
-        target: process.env.SHOPIFY_API_URL || "http://localhost:3000",
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
   },
   plugins: [
     remix({

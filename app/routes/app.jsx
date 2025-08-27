@@ -18,15 +18,17 @@ export default function App() {
 
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
-      <Link
-        to="/app/storeinfoform"
-        className="Polaris-Button Polaris-Button--primary"
-      >
-        StoreInfoForm
-      </Link>
-      <Link style={{ display: "none" }} to="/app/proxy">
-        Proxy
-      </Link>
+      <NavMenu>
+        <Link to="/app" rel="home">
+          Home
+        </Link>
+        <Link to="/app/storeinfoform">StoreInfoForm page</Link>
+        <Link to="/app/billing">Billing page</Link>
+        <Link to="/app/test-metafields">Test Metafields</Link>
+        <Link style={{ display: "none" }} to="/app/proxy">
+          Proxy
+        </Link>
+      </NavMenu>
       <Outlet />
     </AppProvider>
   );

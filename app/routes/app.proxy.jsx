@@ -14,11 +14,12 @@ export const action = async ({ request }) => {
     if (existingStore && existingStore.shop) {
       // Process the shop array to extract country and state from the address
       const processedShop = existingStore.shop.map((store) => {
-        const { country, state, address } = store || {};
+        const { country, state, city, address } = store || {};
         return {
           ...store,
           country: country || "Unknown Country",
           state: state || "Unknown State",
+          city: city || "Unknown City",
         };
       });
 

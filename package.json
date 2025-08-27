@@ -1,5 +1,5 @@
 {
-  "name": "store",
+  "name": "store-point",
   "private": true,
   "scripts": {
     "build": "remix vite:build",
@@ -24,18 +24,15 @@
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
-    "@react-google-maps/api": "^2.20.6",
     "@remix-run/dev": "^2.16.1",
     "@remix-run/fs-routes": "^2.16.1",
     "@remix-run/node": "^2.16.1",
     "@remix-run/react": "^2.16.1",
     "@remix-run/serve": "^2.16.1",
     "@shopify/app-bridge-react": "^4.1.6",
-    "@shopify/cli": "3.80.7",
     "@shopify/polaris": "^12.0.0",
     "@shopify/shopify-app-remix": "^3.7.0",
     "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
-    "dotenv": "^16.5.0",
     "isbot": "^5.1.0",
     "prisma": "^6.2.1",
     "react": "^18.2.0",
@@ -66,13 +63,15 @@
     "@graphql-tools/url-loader": "8.0.16",
     "@graphql-codegen/client-preset": "4.7.0",
     "@graphql-codegen/typescript-operations": "4.5.0",
-    "minimatch": "9.0.5"
+    "minimatch": "9.0.5",
+    "vite": "^6.2.2"
   },
   "overrides": {
     "@graphql-tools/url-loader": "8.0.16",
     "@graphql-codegen/client-preset": "4.7.0",
     "@graphql-codegen/typescript-operations": "4.5.0",
-    "minimatch": "9.0.5"
+    "minimatch": "9.0.5",
+    "vite": "^6.2.2"
   },
-  "author": "Vaibhav Saini"
+  "author": "Shruu"
 }
